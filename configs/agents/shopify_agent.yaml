@@ -1,0 +1,111 @@
+# Shopify Integration Agent Configuration
+log:
+  stdout_log_level: INFO
+  log_file_level: INFO
+  log_file: shopify-agent.log
+
+# Shared SAM config
+!include ../shared_config.yaml
+
+apps:
+  - name: shopify_agent_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE} 
+      supports_streaming: true
+      agent_name: "ShopifyAgent"
+      display_name: "Shopify Integration Agent"
+      model: *mcp_interface_model  # Use the MCP interface model you added
+
+      instruction: |
+        You are the Shopify Integration Agent specializing in e-commerce operations through the Shopify platform. Your responsibilities include:
+
+        **Product Management:**
+        - Search and browse products across Shopify stores
+        - Manage product catalog information
+        - Handle product variants, pricing, and inventory data
+        - Update product descriptions and metadata
+
+        **Customer Operations:**
+        - Manage customer profiles and data
+        - Handle customer tagging and segmentation
+        - Process customer queries and support requests
+        - Track customer purchase history and preferences
+
+        **Order & Cart Management:**
+        - Create and manage shopping carts
+        - Process order information
+        - Handle checkout processes
+        - Track order status and fulfillment
+
+        **Integration Guidelines:**
+        - Use MCP (Model Context Protocol) for Shopify API interactions
+        - Always validate API responses and handle errors gracefully
+        - Maintain data consistency across operations
+        - Provide structured responses with relevant product/customer data
+        - Log all API interactions for audit purposes
+
+        **Response Format:**
+        - Structure responses as JSON when dealing with product/customer data
+        - Include relevant images and product details in artifacts
+        - Provide clear status updates for long-running operations
+
+      inject_system_purpose: true
+      inject_response_format: true
+      inject_user_profile: true
+      session_service: *default_session_service
+      artifact_service: *default_artifact_service
+      artifact_handling_mode: "reference"
+      enable_embed_resolution: true
+      data_tools_config: *default_data_tools_config
+
+      tools:
+        - group_name: artifact_management
+          tool_type: builtin-group
+        - group_name: data_analysis
+          tool_type: builtin-group
+        # MCP integration tools would be configured here
+        # Example MCP server configurations:
+        - tool_type: mcp_server
+          name: shopify_catalog
+          server_config:
+            command: "npx"
+            args: ["@shopify/catalog-mcp-server"]
+            env:
+              SHOPIFY_ACCESS_TOKEN: ${SHOPIFY_ACCESS_TOKEN}
+              SHOPIFY_STORE_DOMAIN: ${SHOPIFY_STORE_DOMAIN}
+        - tool_type: mcp_server  
+          name: shopify_storefront
+          server_config:
+            command: "npx"
+            args: ["@shopify/storefront-mcp-server"]
+            env:
+              SHOPIFY_STOREFRONT_ACCESS_TOKEN: ${SHOPIFY_STOREFRONT_ACCESS_TOKEN}
+              SHOPIFY_STORE_DOMAIN: ${SHOPIFY_STORE_DOMAIN}
+
+      agent_card:
+        description: "Specialized agent for Shopify e-commerce operations including product management, customer operations, and order processing through MCP integration."
+        defaultInputModes: [text]
+        defaultOutputModes: [text, artifacts]
+        skills:
+          - "Shopify Product Search"
+          - "Customer Management"
+          - "Cart and Checkout Operations"
+          - "Inventory Management"
+          - "Order Processing"
+          - "Store Analytics"
+          - "MCP Integration"
+
+      agent_card_publishing:
+        interval_seconds: 15
+        
+      agent_discovery:
+        enabled: true
+        
+      inter_agent_communication:
+        allow_list: ["MerchAgent", "CustomerServiceAgent", "DataAnalysisAgent"]
+        request_timeout_seconds: 300
