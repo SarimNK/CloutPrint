@@ -19,7 +19,7 @@ shared_config:
       # 'api_key' provides authentication.
       api_key: ${LLM_SERVICE_API_KEY} # Use env var for API key
       # Enable parallel tool calls for planning model
-      parallel_tool_calls: true 
+      parallel_tool_calls: false # doesn't let parallel tool calls 
 
       # max_tokens: ${MAX_TOKENS, 16000} # Set a reasonable max token limit for planning
       # temperature: 0.1 # Lower temperature for more deterministic planning
