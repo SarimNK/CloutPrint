@@ -48,6 +48,6 @@ apps:
 
       # --- Frontend Config Passthrough ---
       frontend_welcome_message: >
-            Hosgeldiniz
-      frontend_bot_name: Merch Bot
+            hosgeldiniz
+      frontend_bot_name: meshmerch
       frontend_collect_feedback: false
