@@ -3,13 +3,13 @@
 log:
   stdout_log_level: INFO
   log_file_level: INFO
-  log_file: merch-agent.log
+  log_file: merch-mesh.log
 
 # Shared SAM config
 !include ../shared_config.yaml
 
 apps:
-  - name: merch-agent_app
+  - name: merch-mesh_app
     app_base_path: .
     app_module: solace_agent_mesh.agent.sac.app
     broker:
@@ -18,8 +18,8 @@ apps:
     app_config:
       namespace: ${NAMESPACE} 
       supports_streaming: true
-      agent_name: "MerchAgent"
-      display_name: "MerchAgent"
+      agent_name: "MerchMesh"
+      display_name: "MerchMesh"
       model: *planning_model 
 
       instruction: |
@@ -52,7 +52,7 @@ apps:
       agent_card:
         description: "The Orchestrator component. It manages tasks and coordinates multi-agent workflows."
         defaultInputModes: [text]
-        defaultOutputModes: [text]
+        defaultOutputModes: [text, file]
         skills: [] 
 
       agent_card_publishing: 

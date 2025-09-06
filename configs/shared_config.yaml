@@ -19,7 +19,7 @@ shared_config:
       # 'api_key' provides authentication.
       api_key: ${LLM_SERVICE_API_KEY} # Use env var for API key
       # Enable parallel tool calls for planning model
-      parallel_tool_calls: true 
+      parallel_tool_calls: false 
 
       # max_tokens: ${MAX_TOKENS, 16000} # Set a reasonable max token limit for planning
       # temperature: 0.1 # Lower temperature for more deterministic planning
@@ -58,7 +58,7 @@ shared_config:
     # Default session service configuration
     session_service: &default_session_service
       type: "memory"
-      default_behavior: "PERSISTENT"
+      default_behavior: "RUN_BASED"
     
     # Default artifact service configuration
     artifact_service: &default_artifact_service
