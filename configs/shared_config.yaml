@@ -6,68 +6,140 @@ shared_config:
       broker_password: ${SOLACE_BROKER_PASSWORD, default}
       broker_vpn: ${SOLACE_BROKER_VPN, default}
       temporary_queue: ${USE_TEMPORARY_QUEUES, true}
-      # Ensure high enough limits if many agents are running
-      # max_connection_retries: -1 # Retry forever
+      # Enhanced connection settings for multi-agent scenarios
+      max_connection_retries: 5
+      connection_retry_interval_seconds: 10
+      heartbeat_interval_seconds: 30
 
   - models:
     planning: &planning_model
-      # This dictionary structure tells ADK to use the LiteLlm wrapper.
-      # 'model' uses the specific model identifier your endpoint expects.
-      model: ${LLM_SERVICE_PLANNING_MODEL_NAME} # Use env var for model name
-      # 'api_base' tells LiteLLM where to send the request.
-      api_base: ${LLM_SERVICE_ENDPOINT} # Use env var for endpoint URL
-      # 'api_key' provides authentication.
-      api_key: ${LLM_SERVICE_API_KEY} # Use env var for API key
-      # Enable parallel tool calls for planning model
-      parallel_tool_calls: false # doesn't let parallel tool calls 
-
-      # max_tokens: ${MAX_TOKENS, 16000} # Set a reasonable max token limit for planning
-      # temperature: 0.1 # Lower temperature for more deterministic planning
-      
+      model: ${LLM_SERVICE_PLANNING_MODEL_NAME}
+      api_base: ${LLM_SERVICE_ENDPOINT}
+      api_key: ${LLM_SERVICE_API_KEY}
+      parallel_tool_calls: false
+      max_tokens: ${MAX_TOKENS, 16000}
+      temperature: 0.1  # Lower temperature for more deterministic planning
 
     general: &general_model
-      # This dictionary structure tells ADK to use the LiteLlm wrapper.
-      # 'model' uses the specific model identifier your endpoint expects.
-      model: ${LLM_SERVICE_GENERAL_MODEL_NAME} # Use env var for model name
-      # 'api_base' tells LiteLLM where to send the request.
-      api_base: ${LLM_SERVICE_ENDPOINT} # Use env var for endpoint URL
-      # 'api_key' provides authentication.
-      api_key: ${LLM_SERVICE_API_KEY} # Use env var for API key
+      model: ${LLM_SERVICE_GENERAL_MODEL_NAME}
+      api_base: ${LLM_SERVICE_ENDPOINT}
+      api_key: ${LLM_SERVICE_API_KEY}
+      max_tokens: ${MAX_TOKENS, 8000}
+      temperature: 0.3
 
     image_gen: &image_generation_model
-      # This dictionary structure tells ADK to use the LiteLlm wrapper.
-      # 'model' uses the specific model identifier your endpoint expects.
-      model: ${IMAGE_MODEL_NAME} # Use env var for model name
-      # 'api_base' tells LiteLLM where to send the request.
-      api_base: ${IMAGE_SERVICE_ENDPOINT} # Use env var for endpoint URL
-      # 'api_key' provides authentication.
-      api_key: ${IMAGE_SERVICE_API_KEY} # Use env var for API key
+      model: ${IMAGE_MODEL_NAME}
+      api_base: ${IMAGE_SERVICE_ENDPOINT}
+      api_key: ${IMAGE_SERVICE_API_KEY}
+      # Image-specific parameters
+      image_size: ${IMAGE_SIZE, "1024x1024"}
+      quality: ${IMAGE_QUALITY, "standard"}
 
     report_gen: &report_generation_model
-      # This dictionary structure tells ADK to use the LiteLlm wrapper.
-      # 'model' uses the specific model identifier your endpoint expects.
-      model: ${LLM_REPORT_MODEL_NAME} # Use env var for model name
-      # 'api_base' tells LiteLLM where to send the request.
-      api_base: ${LLM_SERVICE_ENDPOINT} # Use env var for endpoint URL
-      # 'api_key' provides authentication.
-      api_key: ${LLM_SERVICE_API_KEY} # Use env var for API key
+      model: ${LLM_REPORT_MODEL_NAME}
+      api_base: ${LLM_SERVICE_ENDPOINT}
+      api_key: ${LLM_SERVICE_API_KEY}
+      max_tokens: ${REPORT_MAX_TOKENS, 12000}
+      temperature: 0.2  # Slightly lower for consistent reporting
 
-    multimodal: &multimodal_model  "gemini-2.5-flash-preview-04-17"
+    # Your added MCP interface model (enhanced)
+    mcp-interface: &mcp_interface_model
+      model: ${LLM_MCP_INTERFACE_MODEL_NAME}
+      api_base: ${LLM_SERVICE_ENDPOINT}
+      api_key: ${LLM_SERVICE_API_KEY}
+      max_tokens: ${MCP_MAX_TOKENS, 8000}
+      temperature: 0.2
+      # MCP-specific settings
+      timeout_seconds: ${MCP_TIMEOUT, 120}
+      retry_attempts: 3
+
+    multimodal: &multimodal_model  
+      model: "gemini-2.5-flash-preview-04-17"
+      max_tokens: ${MULTIMODAL_MAX_TOKENS, 8000}
+
+    # Additional specialized models
+    customer_service: &customer_service_model
+      model: ${CUSTOMER_SERVICE_MODEL_NAME, ${LLM_SERVICE_GENERAL_MODEL_NAME}}
+      api_base: ${LLM_SERVICE_ENDPOINT}
+      api_key: ${LLM_SERVICE_API_KEY}
+      max_tokens: 6000
+      temperature: 0.4  # Slightly higher for more natural conversation
+
+    analytics: &analytics_model
+      model: ${ANALYTICS_MODEL_NAME, ${LLM_SERVICE_GENERAL_MODEL_NAME}}
+      api_base: ${LLM_SERVICE_ENDPOINT}
+      api_key: ${LLM_SERVICE_API_KEY}
+      max_tokens: 10000
+      temperature: 0.1  # Very low for consistent data analysis
 
   - services:
-    # Default session service configuration
+    # Enhanced session service configuration
     session_service: &default_session_service
       type: "memory"
       default_behavior: "PERSISTENT"
+      max_session_duration_hours: ${MAX_SESSION_DURATION, 24}
+      cleanup_interval_minutes: ${SESSION_CLEANUP_INTERVAL, 60}
     
-    # Default artifact service configuration
+    # Enhanced artifact service configuration
     artifact_service: &default_artifact_service
       type: "filesystem"
       base_path: "/tmp/samv2"
       artifact_scope: namespace
+      max_artifact_size_mb: ${MAX_ARTIFACT_SIZE_MB, 100}
+      cleanup_old_artifacts_days: ${ARTIFACT_CLEANUP_DAYS, 7}
+      enable_versioning: true
     
-    # Default data tools configuration
+    # Enhanced data tools configuration
     data_tools_config: &default_data_tools_config
       sqlite_memory_threshold_mb: 100
       max_result_preview_rows: 50
       max_result_preview_bytes: 4096
+      enable_advanced_analytics: true
+      chart_generation_enabled: true
+      export_formats: ["csv", "xlsx", "json", "pdf"]
+
+    # MCP service configurations
+    mcp_services: &mcp_services
+      shopify_catalog:
+        server_command: "npx @shopify/catalog-mcp-server"
+        environment:
+          SHOPIFY_ACCESS_TOKEN: ${SHOPIFY_ACCESS_TOKEN}
+          SHOPIFY_STORE_DOMAIN: ${SHOPIFY_STORE_DOMAIN}
+        timeout_seconds: 60
+        
+      shopify_storefront:
+        server_command: "npx @shopify/storefront-mcp-server"  
+        environment:
+          SHOPIFY_STOREFRONT_ACCESS_TOKEN: ${SHOPIFY_STOREFRONT_ACCESS_TOKEN}
+          SHOPIFY_STORE_DOMAIN: ${SHOPIFY_STORE_DOMAIN}
+        timeout_seconds: 60
+
+  - integrations:
+    # Shopify-specific configurations
+    shopify_config: &shopify_config
+      store_domain: ${SHOPIFY_STORE_DOMAIN}
+      access_token: ${SHOPIFY_ACCESS_TOKEN}
+      storefront_access_token: ${SHOPIFY_STOREFRONT_ACCESS_TOKEN}
+      api_version: ${SHOPIFY_API_VERSION, "2024-01"}
+      webhook_secret: ${SHOPIFY_WEBHOOK_SECRET}
+      rate_limit_strategy: "exponential_backoff"
+      max_retries: 3
+
+    # Email service configuration
+    email_config: &email_config
+      provider: ${EMAIL_PROVIDER, "smtp"}
+      smtp_host: ${SMTP_HOST}
+      smtp_port: ${SMTP_PORT, 587}
+      smtp_username: ${SMTP_USERNAME}
+      smtp_password: ${SMTP_PASSWORD}
+      use_tls: ${SMTP_USE_TLS, true}
+      default_sender: ${DEFAULT_EMAIL_SENDER}
+
+  - monitoring:
+    # Agent performance monitoring
+    monitoring_config: &monitoring_config
+      enable_metrics: ${ENABLE_METRICS, true}
+      metrics_endpoint: ${METRICS_ENDPOINT, "/metrics"}
+      log_performance: ${LOG_PERFORMANCE, true}
+      alert_on_failures: ${ALERT_ON_FAILURES, true}
+      health_check_interval_seconds: ${HEALTH_CHECK_INTERVAL, 30}

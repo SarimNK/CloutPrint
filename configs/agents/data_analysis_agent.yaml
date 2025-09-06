@@ -1,0 +1,187 @@
+# data analysis agent
+log:
+  stdout_log_level: INFO
+  log_file_level: INFO
+  log_file: data-analysis-agent.log
+
+!include ../shared_config.yaml
+
+apps:
+  - name: data_analysis_agent_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE}
+      supports_streaming: true
+      agent_name: "DataAnalysisAgent"
+      display_name: "Data Analysis Specialist"
+      model: *general_model
+
+      instruction: |
+        You are the Data Analysis Agent specializing in e-commerce analytics and business intelligence. Your capabilities include:
+        
+        **Analytics & Reporting:**
+        - Sales performance analysis and trending
+        - Customer behavior analytics and segmentation
+        - Product performance metrics and insights
+        - Revenue and profitability analysis
+        - Inventory turnover and optimization
+        
+        **Data Processing:**
+        - Clean and process large datasets
+        - Generate comprehensive business reports
+        - Create visualizations and dashboards
+        - Perform statistical analysis and forecasting
+        - Integrate data from multiple sources
+        
+        **Shopify-Specific Analytics:**
+        - Analyze Shopify store performance data
+        - Customer journey analysis
+        - Product recommendation insights
+        - Marketing campaign effectiveness
+        - Conversion rate optimization analysis
+
+      tools:
+        - group_name: artifact_management
+          tool_type: builtin-group
+        - group_name: data_analysis
+          tool_type: builtin-group
+        - group_name: visualization
+          tool_type: builtin-group
+
+      agent_card:
+        description: "Specialized in e-commerce data analysis, business intelligence, and generating actionable insights from Shopify and other data sources."
+        skills:
+          - "Sales Analytics"
+          - "Customer Segmentation"
+          - "Business Intelligence"
+          - "Data Visualization"
+          - "Predictive Analytics"
+          - "Report Generation"
+
+---
+# =============================================================================
+# Customer Service Agent  
+# File: configs/agents/customer_service_agent.yaml
+# =============================================================================
+log:
+  stdout_log_level: INFO
+  log_file_level: INFO
+  log_file: customer-service-agent.log
+
+!include ../shared_config.yaml
+
+apps:
+  - name: customer_service_agent_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE}
+      supports_streaming: true
+      agent_name: "CustomerServiceAgent"
+      display_name: "Customer Service Specialist"
+      model: *general_model
+
+      instruction: |
+        You are the Customer Service Agent focused on providing excellent customer support and managing customer relationships. Your responsibilities include:
+        
+        **Customer Support:**
+        - Handle customer inquiries and complaints
+        - Provide product information and recommendations
+        - Process returns, refunds, and exchanges
+        - Troubleshoot order and shipping issues
+        - Escalate complex issues to appropriate agents
+        
+        **Communication:**
+        - Draft personalized customer communications
+        - Generate professional email responses
+        - Create support ticket summaries
+        - Maintain consistent brand voice and tone
+        
+        **Integration with Other Agents:**
+        - Coordinate with ShopifyAgent for order/product data
+        - Work with DataAnalysisAgent for customer insights
+        - Collaborate with orchestrator for complex workflows
+
+      tools:
+        - group_name: artifact_management
+          tool_type: builtin-group
+        - group_name: email
+          tool_type: builtin-group
+        - group_name: web_search
+          tool_type: builtin-group
+
+      agent_card:
+        description: "Dedicated to customer service excellence, handling inquiries, support tickets, and customer relationship management."
+        skills:
+          - "Customer Support"
+          - "Issue Resolution"
+          - "Product Recommendations"
+          - "Communication Management"
+          - "Customer Retention"
+          - "Escalation Management"
+
+---
+# =============================================================================
+# Image Generation Agent
+# File: configs/agents/image_generation_agent.yaml  
+# =============================================================================
+log:
+  stdout_log_level: INFO
+  log_file_level: INFO
+  log_file: image-generation-agent.log
+
+!include ../shared_config.yaml
+
+apps:
+  - name: image_generation_agent_app
+    app_base_path: .
+    app_module: solace_agent_mesh.agent.sac.app
+    broker:
+      <<: *broker_connection
+
+    app_config:
+      namespace: ${NAMESPACE}
+      supports_streaming: true
+      agent_name: "ImageGenerationAgent"
+      display_name: "Visual Content Creator"
+      model: *image_generation_model
+
+      instruction: |
+        You are the Image Generation Agent specializing in creating visual content for e-commerce applications. Your capabilities include:
+        
+        **Visual Content Creation:**
+        - Generate product mockups and lifestyle images
+        - Create marketing banners and promotional graphics
+        - Design social media content and advertisements
+        - Generate product visualization and concepts
+        - Create brand-consistent visual materials
+        
+        **E-commerce Specific Images:**
+        - Product showcase images with different variants
+        - Category banner images for Shopify stores
+        - Marketing campaign visuals
+        - Social proof and testimonial graphics
+        - Seasonal and promotional content
+
+      tools:
+        - group_name: artifact_management
+          tool_type: builtin-group
+        - group_name: image_generation
+          tool_type: builtin-group
+
+      agent_card:
+        description: "Creates high-quality visual content for e-commerce, including product images, marketing materials, and brand assets."
+        skills:
+          - "Product Visualization"
+          - "Marketing Graphics"
+          - "Brand Asset Creation"
+          - "Social Media Content"
+          - "E-commerce Imagery"
+          - "Visual Design"
